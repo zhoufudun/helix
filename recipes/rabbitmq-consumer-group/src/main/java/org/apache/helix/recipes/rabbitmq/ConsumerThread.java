@@ -92,7 +92,7 @@ public class ConsumerThread extends Thread {
     public void handleDelivery(String consumerTag, Envelope envelope,
         AMQP.BasicProperties properties, byte[] body) {
       System.out.println(
-          " [x] Received '" + envelope.getRoutingKey() + "':'" + new String(body) + "'");
+          " [x] Received '" + envelope.getRoutingKey() + "':'" + new String(body) + "'"+", Thread="+Thread.currentThread().getName());
     }
   }
 }

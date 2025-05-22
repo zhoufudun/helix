@@ -47,13 +47,13 @@ public class ConsumerStateModel extends StateModel {
 
   @Transition(to = "ONLINE", from = "OFFLINE")
   public void onBecomeOnlineFromOffline(Message message, NotificationContext context) {
-    LOG.debug(_consumerId + " becomes ONLINE from OFFLINE for " + _partition);
+    System.out.println(_consumerId + " becomes ONLINE from OFFLINE for " + _partition);
 
     if (_thread == null) {
-      LOG.debug("Starting ConsumerThread for " + _partition + "...");
+      System.out.println("Starting ConsumerThread for " + _partition + "...");
       _thread = new ConsumerThread(_partition, _mqServer, _consumerId);
       _thread.start();
-      LOG.debug("Starting ConsumerThread for " + _partition + " done");
+      System.out.println("Starting ConsumerThread for " + _partition + " done");
 
     }
   }
@@ -61,27 +61,27 @@ public class ConsumerStateModel extends StateModel {
   @Transition(to = "OFFLINE", from = "ONLINE")
   public void onBecomeOfflineFromOnline(Message message, NotificationContext context)
       throws InterruptedException {
-    LOG.debug(_consumerId + " becomes OFFLINE from ONLINE for " + _partition);
+    System.out.println(_consumerId + " becomes OFFLINE from ONLINE for " + _partition);
 
     if (_thread != null) {
-      LOG.debug("Stopping " + _consumerId + " for " + _partition + "...");
+      System.out.println("Stopping " + _consumerId + " for " + _partition + "...");
 
       _thread.interrupt();
       _thread.join(2000);
       _thread = null;
-      LOG.debug("Stopping " + _consumerId + " for " + _partition + " done");
+      System.out.println("Stopping " + _consumerId + " for " + _partition + " done");
 
     }
   }
 
   @Transition(to = "DROPPED", from = "OFFLINE")
   public void onBecomeDroppedFromOffline(Message message, NotificationContext context) {
-    LOG.debug(_consumerId + " becomes DROPPED from OFFLINE for " + _partition);
+    System.out.println(_consumerId + " becomes DROPPED from OFFLINE for " + _partition);
   }
 
   @Transition(to = "OFFLINE", from = "ERROR")
   public void onBecomeOfflineFromError(Message message, NotificationContext context) {
-    LOG.debug(_consumerId + " becomes OFFLINE from ERROR for " + _partition);
+    System.out.println(_consumerId + " becomes OFFLINE from ERROR for " + _partition);
   }
 
   @Override
@@ -89,7 +89,7 @@ public class ConsumerStateModel extends StateModel {
     LOG.warn("Default reset() invoked");
 
     if (_thread != null) {
-      LOG.debug("Stopping " + _consumerId + " for " + _partition + "...");
+      System.out.println("Stopping " + _consumerId + " for " + _partition + "...");
 
       _thread.interrupt();
       try {
@@ -99,7 +99,7 @@ public class ConsumerStateModel extends StateModel {
         e.printStackTrace();
       }
       _thread = null;
-      LOG.debug("Stopping " + _consumerId + " for " + _partition + " done");
+      System.out.println("Stopping " + _consumerId + " for " + _partition + " done");
 
     }
   }

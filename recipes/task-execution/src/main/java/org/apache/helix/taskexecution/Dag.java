@@ -28,7 +28,7 @@ import java.util.Set;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Dag {
-  private Map<String, Node> nodes = new HashMap<String, Dag.Node>();
+  private Map<String, Node> nodes = new HashMap<String, Node>();
   private static ObjectMapper mapper = new ObjectMapper();
 
   public static class Node {

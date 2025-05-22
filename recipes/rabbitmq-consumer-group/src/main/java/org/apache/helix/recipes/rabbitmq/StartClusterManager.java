@@ -24,13 +24,13 @@ import org.apache.helix.controller.HelixControllerMain;
 
 public class StartClusterManager {
   public static void main(String[] args) {
-    if (args.length < 1) {
-      System.err.println("USAGE: java StartClusterManager zookeeperAddress (e.g. localhost:2181)");
-      System.exit(1);
-    }
+//    if (args.length < 1) {
+//      System.err.println("USAGE: java StartClusterManager zookeeperAddress (e.g. localhost:2181)");
+//      System.exit(1);
+//    }
 
     final String clusterName = SetupConsumerCluster.DEFAULT_CLUSTER_NAME;
-    final String zkAddr = args[0];
+    final String zkAddr = "localhost:2199";
 
     try {
       final HelixManager manager =

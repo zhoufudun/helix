@@ -28,17 +28,18 @@ public class Emitter {
   private static final String EXCHANGE_NAME = "topic_logs";
 
   public static void main(String[] args) throws Exception {
-    if (args.length < 1) {
-      System.err
-          .println("USAGE: java Emitter rabbitmqServer (e.g. localhost) numberOfMessage (optional)");
-      System.exit(1);
-    }
+//    if (args.length < 1) {
+//      System.err
+//          .println("USAGE: java Emitter rabbitmqServer (e.g. localhost) numberOfMessage (optional)");
+//      System.exit(1);
+//    }
 
-    final String mqServer = args[0]; // "zzhang-ld";
+    final String mqServer = "127.0.0.1"; // "zzhang-ld";
     int count = Integer.MAX_VALUE;
     if (args.length > 1) {
       try {
-        count = Integer.parseInt(args[1]);
+        count = 10;
+//                Integer.parseInt(args[1]);
       } catch (Exception e) {
         // TODO: handle exception
       }
