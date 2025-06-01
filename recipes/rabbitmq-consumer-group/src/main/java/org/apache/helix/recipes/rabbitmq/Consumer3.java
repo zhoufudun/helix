@@ -19,26 +19,26 @@ package org.apache.helix.recipes.rabbitmq;
  * under the License.
  */
 
-import java.util.List;
-
 import org.apache.helix.HelixManager;
 import org.apache.helix.HelixManagerFactory;
 import org.apache.helix.InstanceType;
 import org.apache.helix.constants.InstanceConstants;
 import org.apache.helix.manager.zk.ZKHelixAdmin;
 import org.apache.helix.manager.zk.ZNRecordSerializer;
-import org.apache.helix.zookeeper.impl.client.ZkClient;
 import org.apache.helix.model.InstanceConfig;
 import org.apache.helix.participant.StateMachineEngine;
+import org.apache.helix.zookeeper.impl.client.ZkClient;
 
-public class Consumer {
+import java.util.List;
+
+public class Consumer3 {
   private final String _zkAddr;
   private final String _clusterName;
   private final String _consumerId;
   private final String _mqServer;
   private HelixManager _manager = null;
 
-  public Consumer(String zkAddr, String clusterName, String consumerId, String mqServer) {
+  public Consumer3(String zkAddr, String clusterName, String consumerId, String mqServer) {
     _zkAddr = zkAddr;
     _clusterName = clusterName;
     _consumerId = consumerId;
@@ -82,13 +82,13 @@ public class Consumer {
 //      System.exit(1);
 //    }
 
-    // 启动打印线程
-    new PrintThreadTask().start();
-
     final String zkAddr = "localhost:2199";
     final String clusterName = SetupConsumerCluster.DEFAULT_CLUSTER_NAME;
-    final String consumerId = "1";
+    final String consumerId = "3";
     final String mqServer = "127.0.0.1";
+
+    // 启动打印线程
+    new PrintThreadTask().start();
 
     ZkClient zkclient = null;
     try {
@@ -107,8 +107,8 @@ public class Consumer {
       }
 
       // start consumer
-      final Consumer consumer =
-          new Consumer(zkAddr, clusterName, "consumer_" + consumerId, mqServer);
+      final Consumer3 consumer =
+          new Consumer3(zkAddr, clusterName, "consumer_" + consumerId, mqServer);
 
       Runtime.getRuntime().addShutdownHook(new Thread() {
         @Override

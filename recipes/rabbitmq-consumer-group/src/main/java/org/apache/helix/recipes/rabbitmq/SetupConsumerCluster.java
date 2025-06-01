@@ -29,7 +29,7 @@ import org.apache.helix.tools.StateModelConfigGenerator;
 public class SetupConsumerCluster {
     public static final String DEFAULT_CLUSTER_NAME = "rabbitmq-consumer-cluster";
     public static final String DEFAULT_RESOURCE_NAME = "topic";
-    public static final int DEFAULT_PARTITION_NUMBER = 6;
+    public static final int DEFAULT_PARTITION_NUMBER = 8;
     public static final String DEFAULT_STATE_MODEL = "OnlineOffline";
 
     public static void main(String[] args) {

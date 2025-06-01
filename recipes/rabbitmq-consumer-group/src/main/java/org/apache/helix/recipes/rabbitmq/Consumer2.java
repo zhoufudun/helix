@@ -84,8 +84,11 @@ public class Consumer2 {
 
     final String zkAddr = "localhost:2199";
     final String clusterName = SetupConsumerCluster.DEFAULT_CLUSTER_NAME;
-    final String consumerId = "222";
+    final String consumerId = "2";
     final String mqServer = "127.0.0.1";
+
+    // 启动打印线程
+    new PrintThreadTask().start();
 
     ZkClient zkclient = null;
     try {

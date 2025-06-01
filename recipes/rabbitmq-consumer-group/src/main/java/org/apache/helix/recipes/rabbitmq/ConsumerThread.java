@@ -31,68 +31,72 @@ import com.rabbitmq.client.Delivery;
 import com.rabbitmq.client.Envelope;
 
 public class ConsumerThread extends Thread {
-  private static final String EXCHANGE_NAME = "topic_logs";
-  private final String _partition;
-  private final String _mqServer;
-  private final String _consumerId;
+    private static final String EXCHANGE_NAME = "topic_logs";
+    private final String _partition;
+    private final String _mqServer;
+    private final String _consumerId;
 
-  public ConsumerThread(String partition, String mqServer, String consumerId) {
-    _partition = partition;
-    _mqServer = mqServer;
-    _consumerId = consumerId;
-  }
-
-  @Override
-  public void run() {
-    Connection connection = null;
-    try {
-      ConnectionFactory factory = new ConnectionFactory();
-      factory.setHost(_mqServer);
-      connection = factory.newConnection();
-      Channel channel = connection.createChannel();
-
-      channel.exchangeDeclare(EXCHANGE_NAME, "topic");
-      String queueName = channel.queueDeclare().getQueue();
-
-      String bindingKey = _partition;
-      channel.queueBind(queueName, EXCHANGE_NAME, bindingKey);
-
-      System.out.println(" [*] " + _consumerId + " Waiting for messages on " + bindingKey
-          + ". To exit press CTRL+C");
-
-      Consumer consumer = new MyConsumer(channel);
-      channel.basicConsume(queueName, true, consumer);
-
-      String consumerTag = channel.basicConsume(queueName, false, consumer);
-      System.out.println("press any key to terminate");
-      System.in.read();
-      channel.basicCancel(consumerTag);
-      channel.close();
-    } catch (Exception e) {
-      e.printStackTrace();
-    } finally {
-      if (connection != null) {
-        try {
-          connection.close();
-        } catch (IOException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        }
-      }
-    }
-  }
-
-  private static class MyConsumer extends DefaultConsumer {
-
-    public MyConsumer(Channel channel) {
-      super(channel);
+    public ConsumerThread(String partition, String mqServer, String consumerId) {
+        _partition = partition;
+        _mqServer = mqServer;
+        _consumerId = consumerId;
     }
 
     @Override
-    public void handleDelivery(String consumerTag, Envelope envelope,
-        AMQP.BasicProperties properties, byte[] body) {
-      System.out.println(
-          " [x] Received '" + envelope.getRoutingKey() + "':'" + new String(body) + "'"+", Thread="+Thread.currentThread().getName());
+    public void run() {
+        Connection connection = null;
+        try {
+            ConnectionFactory factory = new ConnectionFactory();
+            factory.setHost(_mqServer);
+            connection = factory.newConnection();
+            Channel channel = connection.createChannel();
+
+            channel.exchangeDeclare(EXCHANGE_NAME, "topic");
+            String queueName = channel.queueDeclare().getQueue();
+
+            String bindingKey = _partition;
+            channel.queueBind(queueName, EXCHANGE_NAME, bindingKey);
+
+            System.out.println(" [*] " + _consumerId + " Waiting for messages on " + bindingKey
+                    + ". To exit press CTRL+C");
+
+            Consumer consumer = new MyConsumer(channel);
+            channel.basicConsume(queueName, true, consumer);
+
+            String consumerTag = channel.basicConsume(queueName, false, consumer);
+            System.out.println("press any key to terminate");
+            System.in.read();
+            channel.basicCancel(consumerTag);
+            channel.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+
+            synchronized (ConsumerThreadManager.getInstance()) {
+                ConsumerThreadManager.getInstance().addConsumer(_partition, _consumerId);
+            }
+        }
     }
-  }
+
+    private static class MyConsumer extends DefaultConsumer {
+
+        public MyConsumer(Channel channel) {
+            super(channel);
+        }
+
+        @Override
+        public void handleDelivery(String consumerTag, Envelope envelope,
+                                   AMQP.BasicProperties properties, byte[] body) {
+            System.out.println(
+                    " [x] Received '" + envelope.getRoutingKey() + "':'" + new String(body) + "'" + ", Thread=" + Thread.currentThread().getName());
+        }
+    }
 }

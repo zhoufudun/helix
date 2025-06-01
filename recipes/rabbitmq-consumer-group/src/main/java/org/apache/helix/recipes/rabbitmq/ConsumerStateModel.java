@@ -28,79 +28,85 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @StateModelInfo(initialState = "OFFLINE", states = {
-    "ONLINE", "ERROR"
+        "ONLINE", "ERROR"
 })
 public class ConsumerStateModel extends StateModel {
-  private static Logger LOG = LoggerFactory.getLogger(ConsumerStateModel.class);
+    private static Logger LOG = LoggerFactory.getLogger(ConsumerStateModel.class);
 
-  private final String _consumerId;
-  private final String _partition;
+    private final String _consumerId;
+    private final String _partition;
 
-  private final String _mqServer;
-  private ConsumerThread _thread = null;
+    private final String _mqServer;
+    private ConsumerThread _thread = null;
 
-  public ConsumerStateModel(String consumerId, String partition, String mqServer) {
-    _partition = partition;
-    _consumerId = consumerId;
-    _mqServer = mqServer;
-  }
-
-  @Transition(to = "ONLINE", from = "OFFLINE")
-  public void onBecomeOnlineFromOffline(Message message, NotificationContext context) {
-    System.out.println(_consumerId + " becomes ONLINE from OFFLINE for " + _partition);
-
-    if (_thread == null) {
-      System.out.println("Starting ConsumerThread for " + _partition + "...");
-      _thread = new ConsumerThread(_partition, _mqServer, _consumerId);
-      _thread.start();
-      System.out.println("Starting ConsumerThread for " + _partition + " done");
-
+    public ConsumerStateModel(String consumerId, String partition, String mqServer) {
+        _partition = partition;
+        _consumerId = consumerId;
+        _mqServer = mqServer;
     }
-  }
 
-  @Transition(to = "OFFLINE", from = "ONLINE")
-  public void onBecomeOfflineFromOnline(Message message, NotificationContext context)
-      throws InterruptedException {
-    System.out.println(_consumerId + " becomes OFFLINE from ONLINE for " + _partition);
+    @Transition(to = "ONLINE", from = "OFFLINE")
+    public void onBecomeOnlineFromOffline(Message message, NotificationContext context) {
+        System.out.println(_consumerId + " becomes ONLINE from OFFLINE for " + _partition);
 
-    if (_thread != null) {
-      System.out.println("Stopping " + _consumerId + " for " + _partition + "...");
+        if (_thread == null) {
+            System.out.println("Starting ConsumerThread for " + _partition + "...");
+            _thread = new ConsumerThread(_partition, _mqServer, _consumerId);
+            _thread.start();
+            System.out.println("Starting ConsumerThread for " + _partition + " done, thread name=" + Thread.currentThread().getName());
 
-      _thread.interrupt();
-      _thread.join(2000);
-      _thread = null;
-      System.out.println("Stopping " + _consumerId + " for " + _partition + " done");
-
+            synchronized (ConsumerThreadManager.getInstance()) {
+                ConsumerThreadManager.getInstance().addConsumer(_partition, _consumerId);
+            }
+        }
     }
-  }
 
-  @Transition(to = "DROPPED", from = "OFFLINE")
-  public void onBecomeDroppedFromOffline(Message message, NotificationContext context) {
-    System.out.println(_consumerId + " becomes DROPPED from OFFLINE for " + _partition);
-  }
+    @Transition(to = "OFFLINE", from = "ONLINE")
+    public void onBecomeOfflineFromOnline(Message message, NotificationContext context)
+            throws InterruptedException {
+        System.out.println(_consumerId + " becomes OFFLINE from ONLINE for " + _partition);
 
-  @Transition(to = "OFFLINE", from = "ERROR")
-  public void onBecomeOfflineFromError(Message message, NotificationContext context) {
-    System.out.println(_consumerId + " becomes OFFLINE from ERROR for " + _partition);
-  }
+        if (_thread != null) {
+            System.out.println("Stopping " + _consumerId + " for " + _partition + "...");
 
-  @Override
-  public void reset() {
-    LOG.warn("Default reset() invoked");
+            _thread.interrupt();
+            _thread.join(2000);
+            _thread = null;
+            System.out.println("Stopping " + _consumerId + " for " + _partition + " done");
 
-    if (_thread != null) {
-      System.out.println("Stopping " + _consumerId + " for " + _partition + "...");
-
-      _thread.interrupt();
-      try {
-        _thread.join(2000);
-      } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-      _thread = null;
-      System.out.println("Stopping " + _consumerId + " for " + _partition + " done");
-
+        }
+        synchronized (ConsumerThreadManager.getInstance()) {
+            ConsumerThreadManager.getInstance().removeConsumer(_partition, _consumerId);
+        }
     }
-  }
+
+    @Transition(to = "DROPPED", from = "OFFLINE")
+    public void onBecomeDroppedFromOffline(Message message, NotificationContext context) {
+        System.out.println(_consumerId + " becomes DROPPED from OFFLINE for " + _partition);
+    }
+
+    @Transition(to = "OFFLINE", from = "ERROR")
+    public void onBecomeOfflineFromError(Message message, NotificationContext context) {
+        System.out.println(_consumerId + " becomes OFFLINE from ERROR for " + _partition);
+    }
+
+    @Override
+    public void reset() {
+        LOG.warn("Default reset() invoked");
+
+        if (_thread != null) {
+            System.out.println("Stopping " + _consumerId + " for " + _partition + "...");
+
+            _thread.interrupt();
+            try {
+                _thread.join(2000);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            _thread = null;
+            System.out.println("Stopping " + _consumerId + " for " + _partition + " done");
+
+        }
+    }
 }
